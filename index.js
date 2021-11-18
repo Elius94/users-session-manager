@@ -181,6 +181,7 @@ function getUsernameFromSessionKey(key) {
 }
 
 module.exports = {
+    eventEmitter,
     setSessionTimeOut,
     getSessionTimeout,
     initSocketReference,
