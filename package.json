@@ -1,5 +1,5 @@
 {
-    "name": "@elius94/users-session-manager",
+    "name": "users-session-manager",
     "version": "1.0.1",
     "description": "A simple Node.js library to manage users sessions on a web application or any kind of JS apps",
     "main": "index.js",
@@ -33,8 +33,5 @@
         "chai": "^4.3.4",
         "meaningful-string": "^1.3.1",
         "mocha": "^9.1.3"
-    },
-    "publishConfig": {
-        "@elius94:registry": "https://npm.pkg.github.com"
     }
 }
