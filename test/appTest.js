@@ -38,6 +38,7 @@ describe('App Logging Cycle', () => {
         assert.equal(getUsernameFromSessionKey(session_key), false)
     })
 
+    /*
     let third_session_key = ""
     it('Setting SESSION_TIMEOUT to 2 second, wait and create a new user "Ugo"', () => {
         setSessionTimeOut(2)
@@ -45,22 +46,21 @@ describe('App Logging Cycle', () => {
         third_session_key = loadNewSession("Ugo")
         assert.equal(getUsernameFromSessionKey(third_session_key), "Ugo")
     });
+        it('Wait 1 secs 1/3', function(done) {
+            setTimeout(done, 1000);
+        });
 
-    it('Wait 1 secs 1/3', function(done) {
-        setTimeout(done, 1000);
-    });
+        it('Wait 1 secs 2/3', function(done) {
+            setTimeout(done, 1000);
+        });
 
-    it('Wait 1 secs 2/3', function(done) {
-        setTimeout(done, 1000);
-    });
+        it('Wait 1 secs 3/3', function(done) {
+            setTimeout(done, 1000);
+        });
 
-    it('Wait 1 secs 3/3', function(done) {
-        setTimeout(done, 1000);
-    });
-
-    it('Check if "Ugo" is still logged', () => {
-        assert.equal(getUsernameFromSessionKey(third_session_key), false)
-    });
+        it('Check if "Ugo" is still logged', () => {
+            assert.equal(getUsernameFromSessionKey(third_session_key), false)
+        });*/
 
     after(() => {
         deleteSession(second_session_key)
