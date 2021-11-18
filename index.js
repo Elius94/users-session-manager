@@ -139,6 +139,7 @@ function createNewSessionTimer(key, username) {
     return setTimeout((_key, _username) => {
         sendLogoutMessage(_key) // Session is expired... logging out
         delete sessions[_key]
+        eventEmitter.emit('activeUserDeleted', key)
         console.log('[Session Manager]: Removed user', _username)
     }, settings.SESSION_TIMEOUT * 1000, key, username)
 }
