@@ -2,33 +2,85 @@
 A simple Node.js library to manage users sessions on a web application or any kind of JS apps
 
 Install with:
+```sh
+npm i users-session-manager
+```
 
-    npm i users-session-manager
+Example of usage:
+```js
+// Import module
+const sm = require('users-session-manager')
+// Or with ES6 syntax
+// import { setSessionTimeOut, loadNewSession } from 'users-session-manager'
 
-Example of usage
+// Change session Expiration time:
+sm.setSessionTimeOut(6)
 
-    // Import module
-    const sm = require('users-session-manager')
-    // Or with ES6 syntax
-    // import { setSessionTimeOut, loadNewSession } from 'users-session-manager'
+// Call this to initialize a new user session
+sm.loadNewSession("Luca")
+sm.loadNewSession("Fabio")
 
-    // Change session Expiration time:
-    sm.setSessionTimeOut(6)
+// You can listen to events emitted from this library through eventEmitter object exported
+sm.eventEmitter.on("activeUserDeleted", (key) => {
+    console.log(`User ${key} has been deleted`)
+})
 
-    // Call this to initialize a new user session
-    sm.loadNewSession("Luca")
-    sm.loadNewSession("Fabio")
+setInterval(() => {
+    console.log(sm.getLoggedUsers())
+}, 5000)
+```
 
-    // You can listen to events emitted from this library through eventEmitter object exported
-    sm.eventEmitter.on("activeUserDeleted", (key) => {
-        console.log(`User ${key} has been deleted`)
+## Integrate with Socket.io server to notify clients
+
+```js
+const sm = require('users-session-manager')
+const http = require('http')
+
+/**
+ * Create and start an ioSocket server
+ * @param {*} app
+ * "Express" handle
+ * @param {*} port
+ * Port the server should listen on
+ * @returns {SocketIO.Server}
+ * The newly created server
+ */
+ function startServer(app, port) {
+    // Create an http server
+    const server = http.createServer(app)
+    server.listen(port)
+    server.on('error', function(error) { onError(error, port) })
+    server.on('listening', function() { onListening(server) })
+
+    // Create the socketIO server
+    const ENDPOINT = `localhost:3000`;
+    const { Server } = require("socket.io");
+    const io = new Server(server, {
+        cors: {
+            origin: ENDPOINT,
+            methods: ["GET", "POST"]
+        }
+    });
+
+    io.on('connection', (sk) => {
+        console.log('Browser Connected!')
+        sk.on('session_key', async function(data) {
+            const key = data.session_key
+            console.log(`User ${data.user} joined key ${key}`)
+            sk.join(key)
+        })
     })
 
-    setInterval(() => {
-        console.log(sm.getLoggedUsers())
-    }, 5000)
+    return io
+}
 
+sm.initSocketReferences(startServer(app, port)) // Initialize the socket references
 
+sm.eventEmitter.on("notifyClientToLogout", (io, key) => { // When a user logs out, notify the client
+    console.debug(`Session is expired for key ${key}... Logging out now!`)
+    io.in(key).emit('logout') // Emit the logout event to the client
+})
+```
 
 ## Exported APIs
 
@@ -38,6 +90,26 @@ Example of usage
     - 'activeUserDeleted': Called when a session is deleted or if expired
     - 'newActiveUser': Called when a user session is created
     - 'notifyClientToLogout': Called when a session timer is expired, bind this to a Socket.io server to force clients to logout
+
+## Integrate with metrics tools like PM2
+
+```js
+const io = require('@pm2/io') // Initialize the pm2 io module
+
+// The PM2 IO metrics to monitor the number of connected users
+const realtimeUser = io.counter({
+    name: 'Realtime Users',
+    id: 'app/realtime/users',
+})
+
+sm.eventEmitter.on("newActiveUser", (key) => { // When a user logs out, notify the client
+    realtimeUser.inc() // Increment the number of active users
+})
+
+sm.eventEmitter.on("userLoggedOut", (key) => { // When a user logs out, notify the client
+    realtimeUser.dec() // Decrement the number of active users
+})
+```
 
  ## Functions
 
