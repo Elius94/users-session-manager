@@ -62,4 +62,8 @@ describe('App Logging Cycle', () => {
         assert.equal(getUsernameFromSessionKey(third_session_key), false)
     });
 
+    after(() => {
+        deleteSession(second_session_key)
+    })
+
 })
