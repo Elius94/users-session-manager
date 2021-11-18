@@ -4,7 +4,7 @@
     "description": "A simple Node.js library to manage users sessions on a web application or any kind of JS apps",
     "main": "index.js",
     "scripts": {
-        "test": "mocha"
+        "test": "mocha --exit"
     },
     "repository": {
         "type": "git",
