@@ -1,6 +1,6 @@
 {
     "name": "@elius94/users-session-manager",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A simple Node.js library to manage users sessions on a web application or any kind of JS apps",
     "main": "index.js",
     "scripts": {
