@@ -35,6 +35,6 @@
         "mocha": "^9.1.3"
     },
     "publishConfig": {
-        "@eliusoutdoor:registry": "https://npm.pkg.github.com"
+        "@elius94:registry": "https://npm.pkg.github.com"
     }
 }
