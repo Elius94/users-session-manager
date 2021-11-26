@@ -40,6 +40,77 @@ setInterval(() => {
 }, 5000)
 ```
 
+## Example of Frontend and Backend session exchange
+```js
+
+// Frontend
+let session_key = "";
+
+/**
+ * Function to call try_login API
+ *
+ * @param {*} user username text
+ * @param {*} pwd password text
+ * @return {*} false if wrong login or the user table ROW of the selected user JSON format
+ */
+async function TryLogin(user, pwd) {
+    //console.log(ENDPOINT)
+    let credentials = {
+        "username": user,
+        "password": md5(pwd)
+    }
+    const rawResponse = await fetch(ENDPOINT + API_ROUTE, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'api_name': 'try_login'
+        },
+        body: JSON.stringify(credentials)
+    })
+    const user_data = await rawResponse.json()
+    if (user_data.length > 0)
+        session_key = user_data[0].session_key // save session key to the global variable.
+
+        //console.log("user_data: ", user_data)
+    return user_data
+}
+
+// Backend
+
+// API.js route (cutted from the original file)
+...
+case 'try_login':
+response = {
+    accepted: false,
+    message: '',
+    user_data: {}
+}
+if (typeof(req.body) === 'object') {
+    try {
+        const body = req.body
+        const db_response = await db.tryLogin(body.username, body.password, true) // true to get the session key
+        if (db_response !== false) {
+            response.accepted = true
+            response.message = 'Welcome! 😘'
+            response.user_data = db_response
+            response.user_data.session_key = loadNewSession(body.username) // generate a new session key
+        } else {
+            response.accepted = false
+            response.message = 'Wrong username or password... Are you a f**ing HACKER? 💩💩💩'
+        }
+    } catch (error) {
+        response.accepted = false
+        response.message = 'Error in API call!'
+        response.user_data = null
+    } finally {
+        res.send(JSON.stringify(response))
+    }
+}
+break
+...
+```
+
 ## Integrate with Socket.io server to notify clients
 
 ```js
@@ -171,6 +242,10 @@ SessionManager is a class that manages the sessions of the users.
     * [.initSocketReference(ioRef)](#SessionManager+initSocketReference) ⇒ <code>boolean</code>
     * [.getSocketReference()](#SessionManager+getSocketReference) ⇒ <code>SocketIO.Server</code>
     * [.loadNewSession(username)](#SessionManager+loadNewSession) ⇒ <code>string</code>
+    * [.setSessionData(key, data)](#SessionManager+setSessionData) ⇒ <code>boolean</code>
+    * [.getSessionData(key)](#SessionManager+getSessionData) ⇒ <code>object</code>
+    * [.restartSessionTimer(key)](#SessionManager+restartSessionTimer) ⇒ <code>boolean</code>
+    * [.getSessionDetails(key)](#SessionManager+getSessionDetails) ⇒ <code>object</code> \| <code>boolean</code>
     * [.deleteSession(key)](#SessionManager+deleteSession) ⇒ <code>boolean</code>
     * [.deleteAllSessions()](#SessionManager+deleteAllSessions) ⇒ <code>boolean</code>
     * [.sendLogoutMessage(key)](#SessionManager+sendLogoutMessage) ⇒ <code>boolean</code>
@@ -251,12 +326,93 @@ Function to add users sessions in this module. Use it at login
 ```js
 addSession('Gino') // Returns 'session_key'
 ```
+<a name="SessionManager+setSessionData"></a>
+
+### sessionManager.setSessionData(key, data) ⇒ <code>boolean</code>
+Function to set the property 'data' of a session. Use it for example to store something in the session, like the user actions history, etc.
+
+**Kind**: instance method of [<code>SessionManager</code>](#SessionManager)
+**Returns**: <code>boolean</code> - true or false, true if ok
+**Throws**:
+
+- <code>Error</code> If the session_key is not found
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>string</code> | The session_key provided on successful login |
+| data | <code>object</code> | The data to be stored in the session |
+
+**Example**
+```js
+setSessionData('session_key', {'actions': ["logged in", ...]}) // Returns true or false
+```
+<a name="SessionManager+getSessionData"></a>
+
+### sessionManager.getSessionData(key) ⇒ <code>object</code>
+Function to get the property 'data' of a session. Use it for example to get the user actions history, etc.
+
+**Kind**: instance method of [<code>SessionManager</code>](#SessionManager)
+**Returns**: <code>object</code> - The data stored in the session
+**Throws**:
+
+- <code>Error</code> If the session_key is not found
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>string</code> | The session_key provided on successful login |
+
+**Example**
+```js
+getSessionData('session_key') // Returns {'actions': ["logged in", ...]}
+```
+<a name="SessionManager+restartSessionTimer"></a>
+
+### sessionManager.restartSessionTimer(key) ⇒ <code>boolean</code>
+Function that restart the session timer. Use it after an API call to keep the session alive.
+
+**Kind**: instance method of [<code>SessionManager</code>](#SessionManager)
+**Returns**: <code>boolean</code> - true or false, true if ok
+**Throws**:
+
+- <code>Error</code> If the session key is not found
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>string</code> | The session_key |
+
+**Example**
+```js
+restartSessionTimer('session_key') // Returns true or false
+```
+<a name="SessionManager+getSessionDetails"></a>
+
+### sessionManager.getSessionDetails(key) ⇒ <code>object</code> \| <code>boolean</code>
+Function to get details of a session. Use it to get the username, the creation date and the data.
+
+**Kind**: instance method of [<code>SessionManager</code>](#SessionManager)
+**Returns**: <code>object</code> \| <code>boolean</code> - The session details or false if not found
+**Throws**:
+
+- <code>Error</code> If the session key is not found
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>string</code> | The session_key |
+
+**Example**
+```js
+getSessionDetails('session_key') // Returns {'username': 'Gino', 'createdAt': 1523456789, 'data': {'actions': ["logged in", ...]}}
+```
 <a name="SessionManager+deleteSession"></a>
 
 ### sessionManager.deleteSession(key) ⇒ <code>boolean</code>
 Function to delete users sessions in this module. Use it at client logout
 
-**Kind**: instance method of [<code>SessionManager</code>](#SessionManager)
+**Kind**: instance method of [<code>SessionManager</code>](#SessionManager)  
 **Returns**: <code>boolean</code> - true or false, true if ok
 **Throws**:
 

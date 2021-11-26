@@ -116,11 +116,90 @@ export class SessionManager extends EventEmitter {
         this.sessions[newSessionKey] = {
             username,
             key: newSessionKey,
+            createdAt: Date.now(),
             timer: this.createNewSessionTimer(newSessionKey, username)
         }
         this.emit('sessionCreated', newSessionKey)
             //log("[Session Manager]: Active sessions:", sessions)
         return newSessionKey
+    }
+
+    /**
+     * Function to set the property 'data' of a session. Use it for example to store something in the session, like the user actions history, etc.
+     * 
+     * @param {string} key The session_key provided on successful login 
+     * @param {object} data The data to be stored in the session
+     * @return {boolean} true or false, true if ok
+     * @throws {Error} If the session_key is not found
+     * 
+     * @example setSessionData('session_key', {'actions': ["logged in", ...]}) // Returns true or false
+     * 
+     */
+    setSessionData(key, data) {
+        if (this.checkSessionStatus(key)) {
+            if (this.sessions[key]) {
+                this.sessions[key].data = data // Set the data
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
+     * Function to get the property 'data' of a session. Use it for example to get the user actions history, etc.
+     * 
+     * @param {string} key The session_key provided on successful login
+     * @return {object} The data stored in the session
+     * @throws {Error} If the session_key is not found
+     * 
+     * @example getSessionData('session_key') // Returns {'actions': ["logged in", ...]}
+     */
+    getSessionData(key) {
+        if (this.checkSessionStatus(key)) {
+            if (this.sessions[key]) {
+                return this.sessions[key].data
+            }
+        }
+        return false
+    }
+
+    /** Function that restart the session timer. Use it after an API call to keep the session alive.
+     * 
+     * @param {string} key The session_key
+     * @return {boolean} true or false, true if ok
+     * @throws {Error} If the session key is not found
+     * 
+     * @example restartSessionTimer('session_key') // Returns true or false
+     */
+    restartSessionTimer(key) {
+        if (this.checkSessionStatus(key)) {
+            clearTimeout(this.sessions[key].timer)
+            this.sessions[key].timer = this.createNewSessionTimer(key, this.sessions[key].username)
+            return true
+        }
+        return false
+    }
+
+    /**
+     * Function to get details of a session. Use it to get the username, the creation date and the data.
+     * 
+     * @param {string} key The session_key
+     * @return {object|boolean} The session details or false if not found
+     * @throws {Error} If the session key is not found
+     * 
+     * @example getSessionDetails('session_key') // Returns {'username': 'Gino', 'createdAt': 1523456789, 'data': {'actions': ["logged in", ...]}}
+     */
+    getSessionDetails(key) {
+        if (this.checkSessionStatus(key)) {
+            if (this.sessions[key]) {
+                return {
+                    username: this.sessions[key].username,
+                    createdAt: this.sessions[key].createdAt,
+                    data: this.sessions[key].data ? this.sessions[key].data : undefined
+                }
+            }
+        }
+        return false
     }
 
     /**

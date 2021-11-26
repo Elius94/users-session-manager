@@ -57,20 +57,51 @@ describe('App Logging Cycle', () => {
         assert.equal(SM.getUsernameFromSessionKey(third_session_key), "Ugo")
     });
 
-    it('Wait 1 secs 1/3', function(done) {
+    it('Wait 1 seconds', function(done) {
         setTimeout(done, 1000);
     });
 
-    it('Wait 1 secs 2/3', function(done) {
+    it('Wait 2 seconds', function(done) {
         setTimeout(done, 1000);
     });
 
-    it('Wait 1 secs 3/3', function(done) {
+    it('Wait 3 seconds', function(done) {
         setTimeout(done, 1000);
     });
 
     it('Check if "Ugo" is still logged', () => {
         assert.equal(SM.getUsernameFromSessionKey(third_session_key), false)
+    });
+
+    it('Should load a new session "Franco" that will expire in 2 seconds', () => {
+        third_session_key = SM.loadNewSession("Franco")
+        assert.equal(SM.getUsernameFromSessionKey(third_session_key), "Franco")
+    });
+
+    it('Wait 1 second', function(done) {
+        setTimeout(done, 1000);
+    });
+
+    it('Sets sessionTimeout to 4 seconds and restarts the session timer for the last session key, so it will expire in 4 seconds from now', () => {
+        SM.setSessionTimeOut(4)
+        assert.equal(SM.getSessionTimeout(), 4)
+        SM.restartSessionTimer(third_session_key)
+    });
+
+    it('Wait 1 second', function(done) {
+        setTimeout(done, 1000);
+    });
+
+    it('Wait 2 seconds', function(done) {
+        setTimeout(done, 1000);
+    });
+
+    it('Wait 3 seconds', function(done) {
+        setTimeout(done, 1000);
+    });
+
+    it('Check if "Franco" is still logged', () => {
+        assert.equal(SM.getUsernameFromSessionKey(third_session_key), "Franco")
     });
 
     it('Setting SESSION_TIMEOUT to 200 second, wait and create a new user "Giovanni"', () => {
@@ -85,6 +116,43 @@ describe('App Logging Cycle', () => {
     })
 
     it('Check if all sessions are deleted', () => {
+        assert.equal(SM.getLoggedUsers().length, 0)
+    })
+
+    // Check setSessionData and getSessionData methods:
+    it('Sets session data for the last session key', () => {
+        let k = SM.loadNewSession("Andrea")
+        const fake_data = {
+            "history": ["login", "getTable1", "getTable2", "getTable3"],
+            "last_action": "getTable3",
+            "last_action_time": new Date().getTime()
+        }
+        assert.deepEqual(SM.setSessionData(k, fake_data), true)
+        assert.deepEqual(SM.getSessionData(k), fake_data)
+            // delete user Andrea:
+        assert.equal(SM.deleteAllSessions(), true)
+        assert.equal(SM.getLoggedUsers().length, 0)
+    })
+
+    // Check getSessionDetails method:
+    it('Check getSessionDetails method', () => {
+        let k = SM.loadNewSession("Andrea")
+        const fake_data = {
+            "history": ["login", "getTable1", "getTable2", "getTable3"],
+            "last_action": "getTable3",
+            "last_action_time": new Date().getTime()
+        }
+        assert.deepEqual(SM.setSessionData(k, fake_data), true)
+        assert.deepEqual(SM.getSessionData(k), fake_data)
+        const session_details = SM.getSessionDetails(k)
+        assert.include(Object.keys(session_details), "username")
+        assert.include(Object.keys(session_details), "createdAt")
+        assert.include(Object.keys(session_details), "data")
+        assert.equal(session_details.username, "Andrea")
+        assert.deepEqual(session_details.data, fake_data)
+
+        // delete user Andrea:
+        assert.equal(SM.deleteAllSessions(), true)
         assert.equal(SM.getLoggedUsers().length, 0)
     })
 
@@ -119,8 +187,21 @@ describe('App Logging Cycle', () => {
         sinon.assert.calledOnce(spy)
     });
 
+    it('Makes the module to get errored to check the "error" EventEmit', () => {
+        const spy = sinon.spy()
+        SM.on('error', spy)
+        SM.checkSessionStatus("WRONG_NAME")
+        sinon.assert.calledOnce(spy)
+        try {
+            throw spy.args[0][0] // The first argument of the first call is the error
+        } catch (e) {
+            // Check if the error is the right one:
+            assert.equal(e.message, "[Session Manager]: ⚠ !Session rejected! ⚠")
+        }
+        assert.equal(spy.args[0][1].key, "WRONG_NAME")
+    });
+
     after(() => {
         console.log("SessionManager test ended")
     })
-
 })
