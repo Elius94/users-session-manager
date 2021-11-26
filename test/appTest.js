@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import { SessionManager } from '../index.js';
+import sinon from 'sinon';
 
 describe('App Logging Cycle', () => {
     const SM = new SessionManager();
@@ -45,6 +46,7 @@ describe('App Logging Cycle', () => {
     it('Check if singleton works fine with different instances of SessionManager class', () => {
         assert.equal(SM2.getLoggedUsers().length, 1)
         assert.equal(SM2.getLoggedUsers()[0], "Fabio")
+        assert.deepEqual(SM, SM2)
     });
 
     let third_session_key = ""
@@ -85,6 +87,37 @@ describe('App Logging Cycle', () => {
     it('Check if all sessions are deleted', () => {
         assert.equal(SM.getLoggedUsers().length, 0)
     })
+
+    // Check callbacks:
+    let newKey = ""
+    it('Check if callback "sessionCreated" is called when a new user is logged', () => {
+        const spy = sinon.spy()
+        SM.on('sessionCreated', spy)
+        newKey = SM.loadNewSession("Gianfilippo")
+        sinon.assert.calledOnce(spy)
+        sinon.assert.calledWith(spy, newKey)
+    });
+
+    it('Check if callback "sessionDeleted" is called when previous user is deleted', () => {
+        const spy = sinon.spy()
+        SM.on('sessionDeleted', spy)
+        SM.deleteSession(newKey)
+        sinon.assert.calledOnce(spy)
+    });
+
+    // Check if initSocketReference works fine:
+    it('Check if initSocketReference works fine', () => {
+        const skIo = {}
+        SM.initSocketReference(skIo)
+        assert.deepEqual(SM.getSocketReference(), skIo)
+    });
+
+    it('Check if callback "notifyClientToLogout" is called', () => {
+        const spy = sinon.spy()
+        SM.on('notifyClientToLogout', spy)
+        SM.sendLogoutMessage(newKey)
+        sinon.assert.calledOnce(spy)
+    });
 
     after(() => {
         console.log("SessionManager test ended")
