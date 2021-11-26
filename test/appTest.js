@@ -1,49 +1,58 @@
-const assert = require('chai').assert;
-const { loadNewSession, getUsernameFromSessionKey, getLoggedUsers, deleteSession, setSessionTimeOut, getSessionTimeout } = require("../index.js");
+import { assert } from 'chai';
+import { SessionManager } from '../index.js';
 
 describe('App Logging Cycle', () => {
-    let session_key = loadNewSession("Luca")
+    const SM = new SessionManager();
+
+    let session_key = SM.loadNewSession("Luca")
     it('Check session string:', () => {
-        console.log("session_key:", session_key)
+        //console.log("session_key:", session_key)
         assert.equal(typeof session_key, 'string')
     });
 
     it('Get username from session key', () => {
-        assert.equal(getUsernameFromSessionKey(session_key), "Luca")
+        assert.equal(SM.getUsernameFromSessionKey(session_key), "Luca")
     });
 
-    let second_session_key = loadNewSession("Fabio")
+    let second_session_key = SM.loadNewSession("Fabio")
     it('Check second session string:', () => {
-        console.log("session_key:", second_session_key)
+        //console.log("session_key:", second_session_key)
         assert.equal(typeof second_session_key, 'string')
     });
 
     it('Get second username from session key', () => {
-        assert.equal(getUsernameFromSessionKey(second_session_key), "Fabio")
+        assert.equal(SM.getUsernameFromSessionKey(second_session_key), "Fabio")
     });
 
     it('Get all logged users', () => {
-        assert.equal(getLoggedUsers().length, 2)
-        assert.equal(getLoggedUsers()[0], "Luca")
-        assert.equal(getLoggedUsers()[1], "Fabio")
+        assert.equal(SM.getLoggedUsers().length, 2)
+        assert.equal(SM.getLoggedUsers()[0], "Luca")
+        assert.equal(SM.getLoggedUsers()[1], "Fabio")
     });
 
     it('Deleting session of first user', () => {
-        assert.equal(deleteSession(session_key), true)
-        assert.equal(getLoggedUsers().length, 1)
-        assert.notEqual(getLoggedUsers()[0], "Luca")
+        assert.equal(SM.deleteSession(session_key), true)
+        assert.equal(SM.getLoggedUsers().length, 1)
+        assert.notEqual(SM.getLoggedUsers()[0], "Luca")
     });
 
     it('Try to get first username even if it was deleted', () => {
-        assert.equal(getUsernameFromSessionKey(session_key), false)
+        assert.equal(SM.getUsernameFromSessionKey(session_key), false)
     })
+
+    const SM2 = new SessionManager();
+    // Check if singleton works fine with different instances of SessionManager class:
+    it('Check if singleton works fine with different instances of SessionManager class', () => {
+        assert.equal(SM2.getLoggedUsers().length, 1)
+        assert.equal(SM2.getLoggedUsers()[0], "Fabio")
+    });
 
     let third_session_key = ""
     it('Setting SESSION_TIMEOUT to 2 second, wait and create a new user "Ugo"', () => {
-        setSessionTimeOut(2)
-        assert.equal(getSessionTimeout(), 2)
-        third_session_key = loadNewSession("Ugo")
-        assert.equal(getUsernameFromSessionKey(third_session_key), "Ugo")
+        SM.setSessionTimeOut(2)
+        assert.equal(SM.getSessionTimeout(), 2)
+        third_session_key = SM.loadNewSession("Ugo")
+        assert.equal(SM.getUsernameFromSessionKey(third_session_key), "Ugo")
     });
 
     it('Wait 1 secs 1/3', function(done) {
@@ -59,11 +68,26 @@ describe('App Logging Cycle', () => {
     });
 
     it('Check if "Ugo" is still logged', () => {
-        assert.equal(getUsernameFromSessionKey(third_session_key), false)
+        assert.equal(SM.getUsernameFromSessionKey(third_session_key), false)
     });
 
+    it('Setting SESSION_TIMEOUT to 200 second, wait and create a new user "Giovanni"', () => {
+        SM.setSessionTimeOut(200)
+        assert.equal(SM.getSessionTimeout(), 200)
+        third_session_key = SM.loadNewSession("Giovanni")
+        assert.equal(SM.getUsernameFromSessionKey(third_session_key), "Giovanni")
+    });
+
+    it('Deleting all sessions:', () => {
+        assert.equal(SM.deleteAllSessions(), true)
+    })
+
+    it('Check if all sessions are deleted', () => {
+        assert.equal(SM.getLoggedUsers().length, 0)
+    })
+
     after(() => {
-        deleteSession(second_session_key)
+        console.log("SessionManager test ended")
     })
 
 })
