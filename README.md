@@ -18,7 +18,7 @@ npm i users-session-manager
 Example of usage:
 ```js
 // Import module with ES6 syntax
-import { SessionManager } from '../index.js';
+import { SessionManager } from 'users-session-manager';
 
 // Create a new instance of the SessionManager class
 const SM = new SessionManager();
@@ -76,38 +76,147 @@ async function TryLogin(user, pwd) {
     return user_data
 }
 
+// And on the next calls, you can use the session_key to call the API
+
+/**
+ * Function to call get_table_data API
+ *
+ * @param {*} siteid number
+ * @return {*} JSON object
+ */
+async function GetTableData(page) {
+    let body = {
+        page
+    }
+    const rawResponse = await fetch(ENDPOINT + API_ROUTE, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'session_key': session_key,
+            'api_name': 'get_table_data'
+        },
+        body: JSON.stringify(body)
+    })
+    const sectors = await rawResponse.json()
+    if (sectors.logout) Logout()
+        //console.log("sectors: ", sectors)
+    return sectors
+}
+
 // Backend
 
 // API.js route (cutted from the original file)
 ...
 case 'try_login':
-response = {
-    accepted: false,
-    message: '',
-    user_data: {}
-}
-if (typeof(req.body) === 'object') {
-    try {
-        const body = req.body
-        const db_response = await db.tryLogin(body.username, body.password, true) // true to get the session key
-        if (db_response !== false) {
-            response.accepted = true
-            response.message = 'Welcome! 😘'
-            response.user_data = db_response
-            response.user_data.session_key = loadNewSession(body.username) // generate a new session key
-        } else {
-            response.accepted = false
-            response.message = 'Wrong username or password... Are you a f**ing HACKER? 💩💩💩'
-        }
-    } catch (error) {
-        response.accepted = false
-        response.message = 'Error in API call!'
-        response.user_data = null
-    } finally {
-        res.send(JSON.stringify(response))
+    response = {
+        accepted: false,
+        message: '',
+        user_data: {}
     }
+    if (typeof(req.body) === 'object') {
+        try {
+            const body = req.body
+            const db_response = await db.tryLogin(body.username, body.password, true) // true to get the session key
+            if (db_response !== false) {
+                response.accepted = true
+                response.message = 'Welcome! 😘'
+                response.user_data = db_response
+                response.user_data.session_key = loadNewSession(body.username) // generate a new session key
+            } else {
+                response.accepted = false
+                response.message = 'Wrong username or password... Are you a f**ing HACKER? 💩💩💩'
+            }
+        } catch (error) {
+            response.accepted = false
+            response.message = 'Error in API call!'
+            response.user_data = null
+        } finally {
+            res.send(JSON.stringify(response))
+        }
+    }
+    break
+case 'get_table_data':
+    response = {
+        accepted: false,
+        message: '',
+        table_data: {}
+    }
+    if (typeof(req.body) === 'object') {
+        try {
+            const body = req.body
+            if (await db.validateApiRequest(req.headers.session_key, "get_data")) {
+                const dbResponse = await db.getTableData(body.table)
+                if (dbResponse !== false) {
+                    response.accepted = true
+                    response.message = 'OK'
+                    response.table_data = dbResponse
+                } else {
+                    response.accepted = false
+                    response.message = 'Error in API call!'
+                    response.table_data = null
+                }
+            } else {
+                response.accepted = false
+                response.message = 'Action not allowed!'
+                console.warn('Action not allowed! api_name:', api_name)
+            }
+        } catch (error) {
+            response.accepted = false
+            response.message = 'Error in API call!'
+            response.analytics = null
+        } finally {
+            res.send(JSON.stringify(response))
+        }
+    }
+    break
+...
+
+// In file db.js (cutted from the original file)
+...
+/** 
+ * @async
+ * @description Validate the session key
+ * @param {string} sessionKey Session key
+ * @param {string} action Action to validate
+ * @throws Will throw if query to DB will fail
+ * @returns {Promise<boolean>} Return true if session key is valid, false otherwise
+ */
+async function validateApiRequest(sessionKey, action = undefined) {
+    const username = getUsernameFromSessionKey(sessionKey)
+    if (username) {
+        let user_data = undefined
+        const query_user_id = {
+            text: 'SELECT users_management, dataset_management ' +
+                'FROM users WHERE username = $1;',
+            values: [username]
+        }
+        try {
+            const userIdRes = await pool.query(query_user_id)
+                // console.log('[getUserProfilePic]', userProfilePicPathRes.rows)
+            if (!userIdRes.rows.length) {
+                user_data = undefined
+                return false
+            } else {
+                /* This may be a string or null */
+                user_data = userIdRes.rows[0]
+            }
+        } catch (err) {
+            console.error(err)
+            throw err.message
+        }
+        switch (action) {
+            case "get_data":
+                {
+                    // check data validity here
+                }
+                break
+            default:
+                return true
+        }
+    }
+    return false
 }
-break
 ...
 ```
 
