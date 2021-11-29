@@ -1,5 +1,5 @@
-import * as generate from 'meaningful-string'
-import { EventEmitter } from "events";
+const generate = require('meaningful-string')
+const EventEmitter = require('events');
 
 const generation_options = {
     "min": 20,
@@ -28,7 +28,7 @@ function log(msg) {
  * SessionManager is a class that manages the sessions of the users.
  * @extends EventEmitter
  */
-export class SessionManager extends EventEmitter {
+class SessionManager extends EventEmitter {
     constructor() {
         super()
             // Singleton declaration
@@ -317,4 +317,4 @@ export class SessionManager extends EventEmitter {
     }
 }
 
-export default SessionManager
+module.exports = SessionManager

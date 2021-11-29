@@ -1,6 +1,6 @@
-import { assert } from 'chai';
-import { SessionManager } from '../index.js';
-import sinon from 'sinon';
+const assert = require('chai').assert;
+const SessionManager = require('../index.js');
+const sinon = require('sinon');
 
 describe('App Logging Cycle', () => {
     const SM = new SessionManager();

@@ -18,10 +18,12 @@ npm i users-session-manager
 Example of usage:
 ```js
 // Import module with ES6 syntax
-import { SessionManager } from 'users-session-manager';
+import { SessionManager } from 'users-session-manager'
+// or
+// const SessionManager = require('users-session-manager')
 
 // Create a new instance of the SessionManager class
-const SM = new SessionManager();
+const SM = new SessionManager()
 
 // Change session Expiration time:
 SM.setSessionTimeOut(6)
@@ -44,7 +46,7 @@ setInterval(() => {
 ```js
 
 // Frontend
-let session_key = "";
+let session_key = ""
 
 /**
  * Function to call try_login API
