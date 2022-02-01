@@ -1,6 +1,6 @@
 {
     "name": "users-session-manager",
-    "version": "1.0.13",
+    "version": "1.0.14",
     "description": "A simple Node.js library to manage users sessions on a web application or any kind of JS apps",
     "main": "index.js",
     "scripts": {
@@ -22,7 +22,12 @@
         "manager",
         "websocket",
         "website",
-        "sessions"
+        "sessions",
+        "login-system",
+        "session-manager",
+        "session-manager-nodejs",
+        "session-manager-node",
+        "session-manager-nodejs-library"
     ],
     "author": "Elia Lazzari",
     "license": "SEE LICENSE IN LICENSE",
