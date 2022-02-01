@@ -137,6 +137,10 @@ describe('App Logging Cycle', () => {
     // Check getSessionDetails method:
     it('Check getSessionDetails method', () => {
         let k = SM.loadNewSession("Andrea")
+        const session_details_no_data = SM.getSessionDetails(k)
+        assert.include(Object.keys(session_details_no_data), "username")
+        assert.include(Object.keys(session_details_no_data), "createdAt")
+        assert.notInclude(Object.keys(session_details_no_data), "data")
         const fake_data = {
             "history": ["login", "getTable1", "getTable2", "getTable3"],
             "last_action": "getTable3",
@@ -199,6 +203,44 @@ describe('App Logging Cycle', () => {
             assert.equal(e.message, "[Session Manager]: ⚠ !Session rejected! ⚠")
         }
         assert.equal(spy.args[0][1].key, "WRONG_NAME")
+    });
+
+    // Auxiliary functions:
+    // Add process.env.DEBUG to see the console.log messages:
+    process.env.DEBUG = true
+    it('Should log messages to the console', () => {
+        const spy = sinon.spy(console, 'log')
+        SM.checkSessionStatus("WRONG_NAME")
+        sinon.assert.calledOnce(spy)
+        console.log.restore()
+    });
+
+    it('Should try to set SESSION_TIMEOUT below the minimum and it should return false', () => {
+        assert.equal(SM.setSessionTimeOut(1), false)
+    });
+
+    it('Should try to call setSessionData with a non existing value, than should return false', () => {
+        assert.equal(SM.setSessionData("WRONG_KEY", {}), false)
+    });
+
+    it('Should try to call getSessionData with a non existing value, than should return false', () => {
+        assert.equal(SM.getSessionData("WRONG_KEY"), false)
+    });
+
+    it('Should try to call getSessionDetails with a non existing value, than should return false', () => {
+        assert.equal(SM.getSessionDetails("WRONG_KEY"), false)
+    });
+
+    it('Should try to call deleteSession with a non existing values, than should return false', () => {
+        assert.equal(SM.deleteSession("WRONG_KEY"), false)
+    });
+
+    it('Should try to call getLoggedUsers, than should return false', () => {
+        assert.equal(SM.getLoggedUsers(), false)
+    });
+
+    it('Should try to call restartSessionTimer with a non existing value, than should return false', () => {
+        assert.equal(SM.restartSessionTimer("WRONG_KEY"), false)
     });
 
     after(() => {
