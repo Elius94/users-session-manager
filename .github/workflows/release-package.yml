@@ -16,3 +16,8 @@ jobs:
           node-version: 12
       - run: npm ci
       - run: npm run coverage
+      
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
