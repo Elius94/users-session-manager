@@ -10,7 +10,7 @@ Every session has a setTimeout that expires after a certain time (setSessionTime
 When a user logs out, the session is deleted from the class.
 Every action fires an event that can be used to listen to the session manager.
 
- [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=elius94&repo=users-session-manager&theme=github_dark&show_icons=true)](https://github.com/Elius94/users-session-manager) 
+ [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=elius94&repo=users-session-manager&theme=github_dark&show_icons=true)](https://github.com/Elius94/users-session-manager) [![https://nodei.co/npm/users-session-manager.png?downloads=true&downloadRank=true&stars=true](https://nodei.co/npm/users-session-manager.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/users-session-manager)
 
 ## Installation
 
