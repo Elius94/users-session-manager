@@ -16,11 +16,26 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 12
-      - run: npm ci
-      - run: npm test
-      - run: npm run coverage
+          
+      - name: Run ci
+        run: npm ci
+
+      - name: Run tests
+        run: npm run coverage
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          flag-name: ${{matrix.os}}-node-${{ matrix.node }}
+          parallel: true
+
+  finish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
