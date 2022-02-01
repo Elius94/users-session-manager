@@ -51,10 +51,6 @@ class SessionManager extends EventEmitter {
         }
     }
 
-    test2(x) {
-        console.log(x)
-    }
-
     /**
      * This function is used to set the session timeout
      * @param {number} sessionTimeout The session timeout in seconds
