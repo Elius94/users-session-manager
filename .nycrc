@@ -2,9 +2,8 @@
     "all": true,
     "check-coverage": true,
     "reporter": [
-        "text-lcov",
-        "lcov"
+        "text-lcov"
     ],
-    "clean": false,
+    "clean": true,
     "lines": 80
 }
