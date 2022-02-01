@@ -1,3 +1,5 @@
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Elius94/users-session-manager/Node.js%20Package)](https://github.com/Elius94/users-session-manager/actions/workflows/release-package.yml) [![npm version](https://badge.fury.io/js/users-session-manager.svg)](https://npmjs.com/package/users-session-manager) [![npm](https://img.shields.io/npm/dt/users-session-manager)](https://npmjs.com/package/users-session-manager) ![npm bundle size](https://img.shields.io/bundlephobia/min/users-session-manager) ![GitHub](https://img.shields.io/github/license/elius94/users-session-manager)
+
 # users-session-manager
 A simple Node.js module to manage users sessions on a web application or any kind of JS apps
 It uses a Singleton pattern to ensure that only one instance of the module is running at a time.
@@ -8,7 +10,7 @@ Every session has a setTimeout that expires after a certain time (setSessionTime
 When a user logs out, the session is deleted from the class.
 Every action fires an event that can be used to listen to the session manager.
 
- [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=elius94&repo=users-session-manager&theme=github_dark&show_icons=true)](https://github.com/Elius94/users-session-manager)
+ [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=elius94&repo=users-session-manager&theme=github_dark&show_icons=true)](https://github.com/Elius94/users-session-manager) 
 
 ## Installation
 
