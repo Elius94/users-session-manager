@@ -1,6 +1,10 @@
 {
     "all": true,
     "check-coverage": true,
+    "reporter": [
+        "text-lcov",
+        "lcov"
+    ],
     "clean": false,
     "lines": 80
 }
