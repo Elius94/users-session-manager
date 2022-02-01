@@ -1,9 +1,5 @@
 {
     "all": true,
     "check-coverage": true,
-    "collectCoverage": true,
-    "lines-to-cover": {
-        "minimum": 100,
-        "skip-covered": true
-    }
+    "report-dir": "./coverage"
 }
