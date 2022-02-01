@@ -14,8 +14,10 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 12
-      - run: npm ci
-      - run: npm coverage
+      - name: npm install, make test-coverage
+        run: |
+          npm install
+          make test-coverage
 
       - name: Coveralls
         uses: coverallsapp/github-action@master
