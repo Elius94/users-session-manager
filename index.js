@@ -18,7 +18,7 @@ const m_options = {
 class SessionManager extends EventEmitter {
     constructor() {
         super()
-        // Singleton declaration
+            // Singleton declaration
         if (SessionManager._instance) {
             return SessionManager._instance
         }
@@ -45,7 +45,7 @@ class SessionManager extends EventEmitter {
      * @description Logs a message to the console if the debug flag is set to true in the config.
      * 
      */
-    #log(msg) {
+    log(msg) {
         if (process.env.DEBUG) {
             console.log(msg)
         }
@@ -111,7 +111,7 @@ class SessionManager extends EventEmitter {
      * @example addSession('Gino') // Returns 'session_key'
      */
     loadNewSession(username) { // Generate new session
-        this.#log('[Session Manager]: New session saved! 😉')
+        this.log('[Session Manager]: New session saved! 😉')
         const newSessionKey = `${generate.meaningful(m_options)}_${generate.random(generation_options)}`
         this.sessions[newSessionKey] = {
             username,
@@ -120,7 +120,7 @@ class SessionManager extends EventEmitter {
             timer: this.createNewSessionTimer(newSessionKey, username)
         }
         this.emit('sessionCreated', newSessionKey)
-        //this.#log("[Session Manager]: Active sessions:", sessions)
+            //this.log("[Session Manager]: Active sessions:", sessions)
         return newSessionKey
     }
 
@@ -212,7 +212,7 @@ class SessionManager extends EventEmitter {
      * @example deleteSession('session_key') // Returns true or false
      */
     deleteSession(key) { // Generate new session
-        this.#log('[Session Manager]: Deleting session! 😉')
+        this.log('[Session Manager]: Deleting session! 😉')
         let ret = false
         if (this.checkSessionStatus(key)) {
             clearTimeout(this.sessions[key].timer)
@@ -220,7 +220,7 @@ class SessionManager extends EventEmitter {
             ret = true
             this.emit('sessionDeleted', key)
         } else {
-            this.#log(`[Session Manager]: Deleting session`)
+            this.log(`[Session Manager]: Deleting session`)
             ret = false
             this.emit('error', new Error(`[Session Manager]: Deleting session`), {
                 // or anything that you can like an user id
@@ -268,7 +268,7 @@ class SessionManager extends EventEmitter {
             this.sendLogoutMessage(_key) // Session is expired... logging out
             delete this.sessions[_key]
             this.emit('sessionDeleted', key)
-            this.#log('[Session Manager]: Removed user', _username)
+            this.log('[Session Manager]: Removed user', _username)
         }, this.settings.SESSION_TIMEOUT * 1000, key, username)
     }
 
@@ -285,10 +285,10 @@ class SessionManager extends EventEmitter {
      */
     checkSessionStatus(key) {
         if (this.sessions[key]) {
-            this.#log('[Session Manager]: Session accepted! 👍')
+            this.log('[Session Manager]: Session accepted! 👍')
             return true
         }
-        this.#log('[Session Manager]: ⚠ !Session rejected! ⚠')
+        this.log('[Session Manager]: ⚠ !Session rejected! ⚠')
         this.emit('error', new Error(`[Session Manager]: ⚠ !Session rejected! ⚠`), {
             // or anything that you can like an user id
             key
@@ -307,7 +307,7 @@ class SessionManager extends EventEmitter {
         if (this.sessions[key]) {
             return this.sessions[key].username
         }
-        this.#log('[Session Manager]: Session not found...')
+        this.log('[Session Manager]: Session not found...')
         return false
     }
 }
