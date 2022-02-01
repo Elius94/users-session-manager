@@ -1,5 +1,6 @@
 {
     "all": true,
     "check-coverage": true,
-    "report-dir": "./coverage"
+    "report-dir": "./coverage",
+    "lines": 80
 }
