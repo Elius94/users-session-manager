@@ -37,7 +37,7 @@ jobs:
           parallel: true
           
       - name: Publish package to NPM 📦
-        run: npm publish
+        run: cd ../; npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
