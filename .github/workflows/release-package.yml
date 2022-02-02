@@ -3,7 +3,6 @@ env:
   production: true
   
 on:
-  commit_comment:
   push:
     branches: [ main ]
   pull_request:
