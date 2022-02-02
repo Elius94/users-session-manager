@@ -35,11 +35,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ${{matrix.os}}-node-${{ matrix.node }}
           parallel: true
-          
-      - name: Publish package to NPM 📦
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   finish:
     needs: build
@@ -50,3 +45,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
+      
+      - name: Publish package to NPM 📦
+        run: cd ../; npm publish
+          
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
